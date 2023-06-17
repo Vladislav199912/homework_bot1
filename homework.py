@@ -1,7 +1,7 @@
 import time
 import os
 from datetime import datetime, timedelta
-
+from exceptions import APIResponseStatusCodeException
 import requests
 from dotenv import load_dotenv
 import logging
@@ -37,12 +37,12 @@ logging.basicConfig(
 def check_tokens():
     """Проверяет наличие переменных окружения."""
     required_tokens = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    if None in required_tokens:
+    if all(required_tokens):
+        return True
+    else:
         error_text = 'Отсутствуют переменные окружения'
         logging.critical(error_text)
-        return False
-    else:
-        return True
+        sys.exit()
 
 
 def send_message(bot, message):
@@ -65,7 +65,7 @@ def get_api_answer(timestamp):
         if response.status_code != status.OK:
             error_text = f'Ошибка при обращении к API {response.status_code}'
             logging.error(error_text)
-            raise Exception(error_text)
+            raise APIResponseStatusCodeException(error_text)
         elif not python_format:
             error_text = 'Список домашних работ пуст'
             logging.debug(error_text)
